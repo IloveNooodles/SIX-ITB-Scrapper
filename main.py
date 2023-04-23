@@ -22,7 +22,7 @@ parser.add_argument('-c', '--cookie',
                     )
 
 args = parser.parse_args()
-NIM =  args.nim
+NIM = args.nim
 """
 Your NIM in ITB
 """
@@ -113,6 +113,9 @@ def main():
 
 
 def get_all_fakultas() -> List[str]:
+    """
+    Get all available fakultas in ITB
+    """
     r = requests.get(BASE_URL, headers=HEADERS, cookies=COOKIE)
     bs = BeautifulSoup(r.content, "html.parser")
     list_fakultas = bs.find("select", {"id": "fakultas"})
@@ -127,6 +130,9 @@ def get_all_fakultas() -> List[str]:
 
 
 def get_prodi_by_fakultas(fakultas: str) -> List[str]:
+    """
+    Get all prodi from fakultas in ITB
+    """
     URL = f"{BASE_URL}?fakultas={fakultas}"
     r = requests.get(URL, headers=HEADERS, cookies=COOKIE)
     bs = BeautifulSoup(r.content, "html.parser")
@@ -145,6 +151,9 @@ def get_prodi_by_fakultas(fakultas: str) -> List[str]:
 
 
 def get_dosen_matkul_by_fakultas_prodi(fakultas, prodi):
+    """
+    Get all available dosen and matkul given fakultas and prodi in ITB
+    """
     URL = f"{BASE_URL}{create_params(fakultas, prodi[0])}"
     r = requests.get(URL, headers=HEADERS, cookies=COOKIE)
     bs = BeautifulSoup(r.content, "html.parser")
