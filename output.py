@@ -5,7 +5,7 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    generate_matkul_sql()
+    generate_dosen_matkul_sql()
     # parse_dosen_matkul(data_json)
 
     # for index, fakultas in enumerate(data_json):
@@ -99,8 +99,35 @@ def generate_matkul_sql():
     f.close()
 
 
-def generate_dosen_matkul_sql(data):
-    pass
+def generate_dosen_matkul_sql():
+    f = open("data/matkul_id_name.json", "r")
+    matkul_id_name = json.load(f)
+    f.close()
+
+    f = open("data/dosen_id_name.json", "r")
+    dosen_id_name = json.load(f)
+    f.close()
+
+    f = open("data/dosen_matkul_map.json", "r")
+    list_all_dosen = json.load(f)
+    f.close()
+
+    SQL_STATEMENT = 'insert into public.professor_course (id, professor_id, course_id) values\n'
+    ctr = 1
+    for dosen in list_all_dosen:
+        for matkul in list_all_dosen[dosen]['list_matkul']:
+            try:
+                dosen_id = dosen_id_name[dosen]
+                matkul_id = matkul_id_name[matkul]
+            except:
+                continue
+            SQL_STATEMENT += f"({ctr}, {dosen_id}, {matkul_id}),\n"
+            ctr += 1
+
+    SQL_STATEMENT = SQL_STATEMENT[:-2] + ";"
+    f = open("sql/matkul_dosen.sql", "w")
+    f.write(SQL_STATEMENT)
+    f.close()
 
 
 def parse_dosen_matkul(data):
