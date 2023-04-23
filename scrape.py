@@ -107,7 +107,7 @@ def main():
         print(f"Finish scrapped {fakultas}")
 
     saved = json.dumps(res)
-    f = open("saved.json", "w")
+    f = open("data/saved.json", "w")
     f.write(saved)
     f.close()
 

@@ -31,9 +31,10 @@ def main():
             new_data[fakultas][prodi] = to_add
 
     clean_data = json.dumps(new_data)
-    cleaned_data = open("cleaned.json", "w")
+    cleaned_data = open("data/cleaned.json", "w")
     cleaned_data.write(clean_data)
     cleaned_data.close()
+
 
 if __name__ == "__main__":
     main()
