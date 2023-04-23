@@ -5,10 +5,64 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    parse_dosen_matkul(data_json)
+    generate_dosen_sql()
+    # parse_dosen_matkul(data_json)
+
     # for index, fakultas in enumerate(data_json):
     #   for prodi in data_json[fakultas]:
     #       print(prodi)
+
+
+def clean_str(str: str):
+    return str.replace(".", "").replace("'", "")
+
+
+def generate_slug(input: str):
+    removed_dot = clean_str(input).lower()
+    splitted = removed_dot.split(" ")
+    return "-".join(splitted)
+
+
+def generate_dosen_sql():
+    f = open("data/id_prodi_map.json", "r")
+    id_prodi_map = json.load(f)
+    f.close()
+
+    dosen_id_name = {}
+
+    f = open("data/dosen_matkul_map.json", "r")
+    list_all_dosen = json.load(f)
+    f.close()
+    SQL_STATEMENT = 'insert into public.professors (id, "name", institution_id, slug, major_id) values\n'
+    ctr = 1
+    for dosen in list_all_dosen:
+        slug_dosen = generate_slug(dosen)
+        try:
+            major_id = id_prodi_map[list_all_dosen[dosen]['kode_prodi']]
+        except:
+            continue
+        dosen_name = dosen.replace("'", "")
+        dosen_id_name[dosen_name] = ctr
+        SQL_STATEMENT += f"({ctr}, '{dosen_name}', 1, '{slug_dosen}', {major_id}),\n"
+        ctr += 1
+
+    SQL_STATEMENT = SQL_STATEMENT[:-2] + ';'
+    f = open("sql/dosen.sql", "w")
+    f.write(SQL_STATEMENT)
+    f.close()
+
+    to_write = json.dumps(dosen_id_name)
+    f = open("data/dosen_id_name.json", "w")
+    f.write(to_write)
+    f.close()
+
+
+def generate_matkul_sql(data):
+    pass
+
+
+def generate_dosen_matkul_sql(data):
+    pass
 
 
 def parse_dosen_matkul(data):
