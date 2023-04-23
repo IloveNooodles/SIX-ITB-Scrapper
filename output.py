@@ -5,10 +5,72 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    parse_prodi_to_sql(data_json)
+    parse_dosen_matkul(data_json)
     # for index, fakultas in enumerate(data_json):
     #   for prodi in data_json[fakultas]:
     #       print(prodi)
+
+
+def parse_dosen_matkul(data):
+    list_all_dosen = {}
+    list_all_matkul = {}
+    for index, fakultas in enumerate(data):
+        for index, prodi in enumerate(data[fakultas]):
+            list_data = data[fakultas][prodi]
+            for dosen_matkul in list_data:
+                nama_matkul = dosen_matkul['nama_matkul']
+                kode_matkul = dosen_matkul['kode_matkul']
+                nama_prodi = dosen_matkul['nama_prodi']
+                kode_prodi = dosen_matkul['kode_prodi']
+                sks = dosen_matkul['sks']
+
+                if kode_prodi.startswith("1"):
+                    nama_prodi = f"Sarjana - {nama_prodi}"
+                elif kode_prodi.startswith("2"):
+                    nama_prodi = f"Magister - {nama_prodi}"
+                elif kode_prodi.startswith("3"):
+                    nama_prodi = f"Doktor - {nama_prodi}"
+                # Dosen
+                for dosen in dosen_matkul['list_dosen']:
+                    if dosen not in list_all_dosen.keys():
+                        list_all_dosen[dosen] = {}
+                        list_all_dosen[dosen]['list_matkul'] = set()
+                        list_all_dosen[dosen]['kode_prodi'] = kode_prodi
+                        list_all_dosen[dosen]['nama_prodi'] = nama_prodi
+                        list_all_dosen[dosen]['list_matkul'].add(nama_matkul)
+                    else:
+                        list_all_dosen[dosen]['list_matkul'].add(nama_matkul)
+
+                    # Matkul
+                    if nama_matkul not in list_all_matkul.keys():
+                        list_all_matkul[nama_matkul] = {}
+                        list_all_matkul[nama_matkul]['sks'] = sks
+                        list_all_matkul[nama_matkul]['kode_matkul'] = kode_matkul
+                        list_all_matkul[nama_matkul]['kode_prodi'] = kode_prodi
+                        list_all_matkul[nama_matkul]['nama_prodi'] = nama_prodi
+                        list_all_matkul[nama_matkul]["list_dosen"] = set()
+                        list_all_matkul[nama_matkul]["list_dosen"].add(dosen)
+                    else:
+                        list_all_matkul[nama_matkul]["list_dosen"].add(dosen)
+    # Dosen
+    for dosen in list_all_dosen:
+        list_all_dosen[dosen]['list_matkul'] = list(
+            list_all_dosen[dosen]['list_matkul'])
+
+    to_write = json.dumps(list_all_dosen)
+    f = open("data/dosen_matkul_map.json", "w")
+    f.write(to_write)
+    f.close()
+
+    for matkul in list_all_matkul:
+        list_all_matkul[matkul]['list_dosen'] = list(
+            list_all_matkul[matkul]['list_dosen'])
+
+    # Matkul
+    to_write = json.dumps(list_all_matkul)
+    f = open("data/matkul_dosen_map.json", "w")
+    f.write(to_write)
+    f.close()
 
 
 def parse_fakultas(data):
@@ -83,6 +145,7 @@ FAKULTAS_MAPPING = {
 def parse_prodi_to_sql(data):
     sql_statement = f'insert into public.majors (id, faculty_id, "name", code) values '
     ctr = 1
+    id_prodi_map = {}
     for fakultas in data:
         for prodi in data[fakultas]:
             list_data = data[fakultas][prodi]
@@ -108,9 +171,12 @@ def parse_prodi_to_sql(data):
                 nama_prodi = f"Doktor - {nama_prodi}"
 
             sql_statement += f"({ctr}, {faculty_id}, '{nama_prodi}', {kode_prodi}),\n"
+            id_prodi_map[kode_prodi] = ctr
             ctr += 1
+
+    # id_prodi = json.dumps(id_prodi_map)
     sql_statement = sql_statement[:-2] + ';'
-    f = open("sql/prodi.sql", "w")
+    f = open("data/prodi.sql", "w")
     f.write(sql_statement)
     f.close()
 
