@@ -5,7 +5,7 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    generate_dosen_sql()
+    generate_matkul_sql()
     # parse_dosen_matkul(data_json)
 
     # for index, fakultas in enumerate(data_json):
@@ -14,7 +14,13 @@ def main():
 
 
 def clean_str(str: str):
-    return str.replace(".", "").replace("'", "")
+    return str.replace(".", "")\
+        .replace("'", "")\
+        .replace(")", "")\
+        .replace("(", "")\
+        .replace(",", "")\
+        .replace("&", "")\
+        .replace("-", "")
 
 
 def generate_slug(input: str):
@@ -57,8 +63,40 @@ def generate_dosen_sql():
     f.close()
 
 
-def generate_matkul_sql(data):
-    pass
+def generate_matkul_sql():
+    f = open("data/id_prodi_map.json", "r")
+    id_prodi_map = json.load(f)
+    f.close()
+
+    matkul_id_name = {}
+
+    f = open("data/matkul_dosen_map.json", "r")
+    list_all_matkul = json.load(f)
+    f.close()
+    SQL_STATEMENT = 'insert into public.courses (id, course_id, course_name, institution_id, slug, major_id, sks) values\n'
+    ctr = 1
+    for matkul in list_all_matkul:
+        slug_matkul = generate_slug(matkul).replace("--", "-")
+        kode_matkul = list_all_matkul[matkul]['kode_matkul']
+        sks = list_all_matkul[matkul]['sks']
+        try:
+            major_id = id_prodi_map[list_all_matkul[matkul]['kode_prodi']]
+        except:
+            continue
+        matkul_name = matkul.replace("'", "")
+        matkul_id_name[matkul_name] = ctr
+        SQL_STATEMENT += f"({ctr}, '{kode_matkul}', '{matkul_name}', 1, '{slug_matkul}', {major_id}, {sks}),\n"
+        ctr += 1
+
+    SQL_STATEMENT = SQL_STATEMENT[:-2] + ';'
+    f = open("sql/matkul.sql", "w")
+    f.write(SQL_STATEMENT)
+    f.close()
+
+    to_write = json.dumps(matkul_id_name)
+    f = open("data/matkul_id_name.json", "w")
+    f.write(to_write)
+    f.close()
 
 
 def generate_dosen_matkul_sql(data):
