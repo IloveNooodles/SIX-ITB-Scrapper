@@ -5,7 +5,7 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    parse_fakultas(data_json)
+    parse_prodi_to_sql(data_json)
     # for index, fakultas in enumerate(data_json):
     #   for prodi in data_json[fakultas]:
     #       print(prodi)
@@ -32,7 +32,7 @@ def parse_fakultas(data):
                 ctr += 1
         except KeyError:
             pass
-    
+
     sql_statement = to_write[:-2] + ';'
     f = open("sql/fakultas.sql", "w")
     f.write(sql_statement)
@@ -64,17 +64,42 @@ def parse_prodi(data):
     f.close()
 
 
+FAKULTAS_MAPPING = {
+    "FMIPA": 1,
+    "SITH": [2, 3],
+    "SF": 4,
+    "FITB": 5,
+    "STEI": 6,
+    "FTTM": 7,
+    "FTSL": 8,
+    "FTI": 9,
+    "FTMD": 10,
+    "SAPPK": 11,
+    "FSRD": 12,
+    "SBM": 13
+}
+
+
 def parse_prodi_to_sql(data):
-    prodi_namaprodi = {}
-    SQL_STR = f"INSERT INTO"
-    for index, fakultas in enumerate(data):
-        for index, prodi in enumerate(data[fakultas]):
+    sql_statement = f'insert into public.majors (id, faculty_id, "name", code) values '
+    ctr = 1
+    for fakultas in data:
+        for prodi in data[fakultas]:
             list_data = data[fakultas][prodi]
             if not list_data:
                 continue
             nama_prodi = list_data[0]['nama_prodi']
             kode_prodi = list_data[0]['kode_prodi']
-            a = ""
+            try:
+                faculty_id = FAKULTAS_MAPPING[fakultas]
+            except:
+                continue
+            if fakultas == "SITH":
+                if "Rekayasa" in nama_prodi:
+                    faculty_id = faculty_id[1]
+                else:
+                    faculty_id = faculty_id[0]
+
             if kode_prodi.startswith("1"):
                 nama_prodi = f"Sarjana - {nama_prodi}"
             elif kode_prodi.startswith("2"):
@@ -82,11 +107,11 @@ def parse_prodi_to_sql(data):
             elif kode_prodi.startswith("3"):
                 nama_prodi = f"Doktor - {nama_prodi}"
 
-            prodi_namaprodi[kode_prodi] = nama_prodi
-
-    to_write = json.dumps(prodi_namaprodi)
-    f = open("data/prodi.json", "w")
-    f.write(to_write)
+            sql_statement += f"({ctr}, {faculty_id}, '{nama_prodi}', {kode_prodi}),\n"
+            ctr += 1
+    sql_statement = sql_statement[:-2] + ';'
+    f = open("sql/prodi.sql", "w")
+    f.write(sql_statement)
     f.close()
 
 
