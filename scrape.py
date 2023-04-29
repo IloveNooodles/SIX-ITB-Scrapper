@@ -27,7 +27,7 @@ NIM = args.nim
 Your NIM in ITB
 """
 
-BASE_URL = f"https://akademik.itb.ac.id/app/K/mahasiswa:{NIM}+2022-2/kelas/jadwal/kuliah"
+BASE_URL = f"https://akademik.itb.ac.id/app/K/mahasiswa:{NIM}+2022-1/kelas/jadwal/kuliah"
 """
 BASE URL for the scrapping
 """
@@ -96,15 +96,26 @@ def create_params(fakultas: str, prodi: int) -> str:
 
 def main():
     res = {}
-    list_fakultas = get_all_fakultas()
-    for fakultas in list_fakultas:
-        list_prodi = get_prodi_by_fakultas(fakultas)
-        res[fakultas] = {}
-        for prodi in list_prodi:
-            result = get_dosen_matkul_by_fakultas_prodi(fakultas, prodi)
-            res[fakultas][prodi[0]] = result
-            print(f"Finish scrapped {fakultas} - {prodi[0]} - {prodi[1]}")
-        print(f"Finish scrapped {fakultas}")
+    for i in range(2):
+        BASE_URL = f"https://akademik.itb.ac.id/app/K/mahasiswa:{NIM}+2022-{i + 1}/kelas/jadwal/kuliah"
+        list_fakultas = get_all_fakultas(BASE_URL)
+        if (i == 0):
+            print("="*8 + "Semester Ganjil" + "="*8)
+        else:
+            print("="*8 + "Semester Genap" + "="*8)
+        for fakultas in list_fakultas:
+            list_prodi = get_prodi_by_fakultas(fakultas, BASE_URL)
+            if fakultas not in res:
+                res[fakultas] = {}
+            for prodi in list_prodi:
+                result = get_dosen_matkul_by_fakultas_prodi(
+                    fakultas, prodi, BASE_URL)
+                if prodi[0] in res[fakultas]:
+                    res[fakultas][prodi[0]] += result
+                else:
+                    res[fakultas][prodi[0]] = result
+                print(f"Finish scrapped {fakultas} - {prodi[0]} - {prodi[1]}")
+            print(f"Finish scrapped {fakultas}")
 
     saved = json.dumps(res)
     f = open("data/saved.json", "w")
@@ -112,7 +123,7 @@ def main():
     f.close()
 
 
-def get_all_fakultas() -> List[str]:
+def get_all_fakultas(BASE_URL=BASE_URL) -> List[str]:
     """
     Get all available fakultas in ITB
     """
@@ -129,7 +140,7 @@ def get_all_fakultas() -> List[str]:
     return list_fakultas_string
 
 
-def get_prodi_by_fakultas(fakultas: str) -> List[str]:
+def get_prodi_by_fakultas(fakultas: str, BASE_URL=BASE_URL) -> List[str]:
     """
     Get all prodi from fakultas in ITB
     """
@@ -150,7 +161,7 @@ def get_prodi_by_fakultas(fakultas: str) -> List[str]:
     return list_prodi_string
 
 
-def get_dosen_matkul_by_fakultas_prodi(fakultas, prodi):
+def get_dosen_matkul_by_fakultas_prodi(fakultas, prodi, BASE_URL=BASE_URL):
     """
     Get all available dosen and matkul given fakultas and prodi in ITB
     """

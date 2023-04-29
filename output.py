@@ -5,8 +5,14 @@ def main():
     data = open("data/cleaned.json", "r")
     data_json = json.load(data)
     data.close()
-    generate_dosen_matkul_sql()
     # parse_dosen_matkul(data_json)
+    # generate_dosen_sql()
+    # generate_matkul_sql()
+    # parse_prodi_to_sql(data_json)
+    # parse_fakultas(data_json)
+    # parse_prodi(data_json)
+    # parse_prodi_to_sql(data_json)
+    generate_dosen_matkul_sql()
 
     # for index, fakultas in enumerate(data_json):
     #   for prodi in data_json[fakultas]:
@@ -196,12 +202,10 @@ def parse_fakultas(data):
     f = open("data/fakultas_shorthand.json", "r")
     fakutlas_shorthand_map_json = json.load(f)
     f.close()
-    print(fakutlas_shorthand_map_json)
 
     f = open("data/fakultas.json", "r")
     fakultas_map = json.load(f)
     f.close()
-    print(fakultas_map)
 
     to_write = f'insert into public.faculties (id, institution_id, "name", code) values '
     ctr = 1
@@ -249,12 +253,12 @@ FAKULTAS_MAPPING = {
     "FMIPA": 1,
     "SITH": [2, 3],
     "SF": 4,
-    "FITB": 5,
-    "STEI": 6,
-    "FTTM": 7,
-    "FTSL": 8,
-    "FTI": 9,
-    "FTMD": 10,
+    "FTTM": 5,
+    "FITB": 6,
+    "FTI": 7,
+    "STEI": 8,
+    "FTMD": 9,
+    "FTSL": 10,
     "SAPPK": 11,
     "FSRD": 12,
     "SBM": 13
@@ -295,7 +299,7 @@ def parse_prodi_to_sql(data):
 
     # id_prodi = json.dumps(id_prodi_map)
     sql_statement = sql_statement[:-2] + ';'
-    f = open("data/prodi.sql", "w")
+    f = open("sql/prodi.sql", "w")
     f.write(sql_statement)
     f.close()
 

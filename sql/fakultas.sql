@@ -1,5 +1,4 @@
-insert into public.faculties (id, institution_id, "name", code) values 
-(1, 1, 'Fakultas Matematika dan Ilmu Pengetahuan Alam', 160),
+insert into public.faculties (id, institution_id, "name", code) values (1, 1, 'Fakultas Matematika dan Ilmu Pengetahuan Alam', 160),
 (2, 1, 'Sekolah Ilmu Teknologi Hayati - Sains', 161),
 (3, 1, 'Sekolah Ilmu Teknologi Hayati - Rekayasa', 198),
 (4, 1, 'Sekolah Farmasi', 162),

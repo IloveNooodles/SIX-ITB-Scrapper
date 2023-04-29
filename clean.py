@@ -7,7 +7,7 @@ def main():
     """
     removed unavailable matakuliah
     """
-    f = open("saved.json", "r")
+    f = open("data/saved.json", "r")
     data = json.load(f)
     f.close()
 
