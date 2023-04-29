@@ -1,4 +1,6 @@
 import json
+import random
+import string
 
 
 def main():
@@ -12,7 +14,7 @@ def main():
     # parse_fakultas(data_json)
     # parse_prodi(data_json)
     # parse_prodi_to_sql(data_json)
-    generate_dosen_matkul_sql()
+    # generate_dosen_matkul_sql()
 
     # for index, fakultas in enumerate(data_json):
     #   for prodi in data_json[fakultas]:
@@ -32,7 +34,19 @@ def clean_str(str: str):
 def generate_slug(input: str):
     removed_dot = clean_str(input).lower()
     splitted = removed_dot.split(" ")
-    return "-".join(splitted)
+    result = "-".join(splitted)
+    result += "-" + generate_random()
+    return result
+
+
+def generate_random():
+    charset = string.ascii_lowercase
+    ans = ""
+    size = len(charset)
+    for i in range(8):
+        ans += charset[random.randint(0, size - 1)]
+
+    return ans
 
 
 def generate_dosen_sql():
